@@ -20,7 +20,15 @@ string_length:
 
 ; Принимает указатель на нуль-терминированную строку, выводит её в stdout
 print_string:
-    xor rax, rax
+    push rbx
+    mov rbx, rdi
+    call string_length
+    mov rdx, rax
+    mov rsi, rbx
+    mov rax, 1
+    mov rdi, 1
+    syscall
+    pop rbx
     ret
 
 ; Принимает код символа и выводит его в stdout
