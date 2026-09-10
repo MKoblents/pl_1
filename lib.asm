@@ -66,7 +66,20 @@ print_int:
 ; Принимает два указателя на нуль-терминированные строки, возвращает 1 если они равны, 0 иначе
 string_equals:
     xor rax, rax
-    ret
+    .loop:
+        mov r8b, [rdi + rax]
+        cmp r8b, [rsi + rax]
+        jne .not_equal
+        test r8b, r8b
+        je .equal
+        inc rax
+        jmp .loop
+    .not_equal:
+        xor rax, rax
+        ret
+    .equal:
+        mov rax, 1
+        ret
 
 ; Читает один символ из stdin и возвращает его. Возвращает 0 если достигнут конец потока
 read_char:
