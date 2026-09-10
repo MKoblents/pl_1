@@ -254,8 +254,47 @@ parse_uint:
 ; Возвращает в rax: число, rdx : его длину в символах (включая знак, если он был) 
 ; rdx = 0 если число прочитать не удалось
 parse_int:
-    xor rax, rax
-    ret 
+    push rbx
+    xor rdx, rdx
+    push r12
+    xor rbx, rbx
+    xor r12, r12
+    movzx r8d, byte [rdi]
+    cmp r8b, '-'
+    je .negative
+    cmp r8b, '+'
+    je .positive
+    jmp .parse_number
+    .negative:
+        mov rbx, -1
+        inc r12
+        inc rdi
+        jmp .parse_number
+    .positive:
+        mov rbx, 1
+        inc r12
+        inc rdi
+        jmp .parse_number
+    .parse_number:
+        sub rsp, 8
+        call parse_uint
+        add rsp, 8
+        test rdx, rdx
+        jz .error
+        add rdx, r12
+        cmp rbx, -1
+        jne .done
+        neg rax
+        jmp .done
+    .done:
+        pop r12
+        pop rbx
+        ret
+    .error:
+        xor rax, rax
+        xor rdx, rdx
+        jmp .done
+
 
 ; Принимает указатель на строку, указатель на буфер и длину буфера
 ; Копирует строку в буфер
