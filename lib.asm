@@ -66,55 +66,66 @@ print_uint:
     xor r12, r12
     test rbx, rbx
     jz .print_zero
-.loop:
-    test rbx, rbx
-    jz .add_null
-    mov rax, rbx
-    xor rdx, rdx
-    mov r13, 10
-    div r13
-    add dl, '0'
-    mov [rsp + r12], dl
-    mov rbx, rax
-    inc r12
-    jmp .loop
-.add_null:
-    mov byte [rsp + r12], 0
-.reverce:
-    xor r13, r13
-    mov r14, r12
-    dec r14
-    .reverce_loop:
-        cmp r13, r14
-        jge .done
-        mov r15b, [rsp + r13]
-        mov al, [rsp + r14]
-        mov [rsp + r13], al
-        mov [rsp + r14], r15b
-        inc r13
+    .loop:
+        test rbx, rbx
+        jz .add_null
+        mov rax, rbx
+        xor rdx, rdx
+        mov r13, 10
+        div r13
+        add dl, '0'
+        mov [rsp + r12], dl
+        mov rbx, rax
+        inc r12
+        jmp .loop
+    .add_null:
+        mov byte [rsp + r12], 0
+    .reverce:
+        xor r13, r13
+        mov r14, r12
         dec r14
-        jmp .reverce_loop
-.done:
-    mov rdi, rsp
-    call print_string
-.end:
-    add rsp, 32
-    pop r15
-    pop r14
-    pop r13
-    pop r12
-    pop rbx
-    ret
-.print_zero:
-    mov byte [rsp], '0'
-    mov r12, 1
-    jmp .add_null
+        .reverce_loop:
+            cmp r13, r14
+            jge .done
+            mov r15b, [rsp + r13]
+            mov al, [rsp + r14]
+            mov [rsp + r13], al
+            mov [rsp + r14], r15b
+            inc r13
+            dec r14
+            jmp .reverce_loop
+    .done:
+        mov rdi, rsp
+        call print_string
+    .end:
+        add rsp, 32
+        pop r15
+        pop r14
+        pop r13
+        pop r12
+        pop rbx
+        ret
+    .print_zero:
+        mov byte [rsp], '0'
+        mov r12, 1
+        jmp .add_null
 
 
 ; Выводит знаковое 8-байтовое число в десятичном формате 
 print_int:
-    xor rax, rax
-    ret
+    test rdi, rdi
+    js .negative
+    jmp print_uint
+    .negative:
+        push rbx
+        mov rbx, rdi
+        mov rdi, '-'
+        call print_char
+        neg rbx
+        mov rdi, rbx
+        pop rbx
+        jmp print_uint
+        ret
 
 ; Принимает два указателя на нуль-терминированные строки, возвращает 1 если они равны, 0 иначе
 string_equals:
@@ -169,50 +180,50 @@ read_word:
     mov rbx, rdi
     mov r13, rsi
     xor r12, r12
-.skip_spaces:
-    call read_char
-    cmp rax, 0
-    je .eof
-    cmp al, 0x20
-    je .skip_spaces
-    cmp al, 0x9
-    je .skip_spaces
-    cmp al, 0xA
-    je .skip_spaces
-    movzx r14, al
-    jmp .read_word
-.read_word:
-    mov rax, r13
-    dec rax
-    cmp r12, rax
-    jae .too_long
-    mov [rbx + r12], r14b
-    inc r12
-    call read_char
-    test rax, rax
-    je .eof 
-    cmp al, 0x20
-    je .done
-    cmp al, 0x9
-    je .done
-    cmp al, 0xA
-    je .done
-    movzx r14, al
-    jmp .read_word
-.too_long:
-    xor rax, rax
-    jmp .done
-.eof:
-    mov byte [rbx + r12], 0
-    mov rax, rbx
-    mov rdx, r12
-.done:
-    add rsp, 8
-    pop r14
-    pop r13
-    pop r12
-    pop rbx
-    ret
+    .skip_spaces:
+        call read_char
+        cmp rax, 0
+        je .eof
+        cmp al, 0x20
+        je .skip_spaces
+        cmp al, 0x9
+        je .skip_spaces
+        cmp al, 0xA
+        je .skip_spaces
+        movzx r14, al
+        jmp .read_word
+    .read_word:
+        mov rax, r13
+        dec rax
+        cmp r12, rax
+        jae .too_long
+        mov [rbx + r12], r14b
+        inc r12
+        call read_char
+        test rax, rax
+        je .eof 
+        cmp al, 0x20
+        je .done
+        cmp al, 0x9
+        je .done
+        cmp al, 0xA
+        je .done
+        movzx r14, al
+        jmp .read_word
+    .too_long:
+        xor rax, rax
+        jmp .done
+    .eof:
+        mov byte [rbx + r12], 0
+        mov rax, rbx
+        mov rdx, r12
+    .done:
+        add rsp, 8
+        pop r14
+        pop r13
+        pop r12
+        pop rbx
+        ret
 ; Принимает указатель на строку, пытается
 ; прочитать из её начала беззнаковое число.
 ; Возвращает в rax: число, rdx : его длину в символах
