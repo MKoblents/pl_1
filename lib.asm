@@ -109,9 +109,58 @@ read_char:
 ; Эта функция должна дописывать к слову нуль-терминатор
 
 read_word:
+    push rbx
+    push r12
+    push r13
+    push r14
+    sub rsp, 8
+    mov rbx, rdi
+    mov r13, rsi
+    xor r12, r12
+.skip_spaces:
+    call read_char
+    cmp rax, 0
+    je .eof
+    cmp al, 0x20
+    je .skip_spaces
+    cmp al, 0x9
+    je .skip_spaces
+    cmp al, 0xA
+    je .skip_spaces
+    movzx r14, al
+    jmp .read_word
+.read_word:
+    mov rax, r13
+    dec rax
+    cmp r12, rax
+    jae .too_long
+    mov [rbx + r12], r14b
+    inc r12
+    call read_char
+    test rax, rax
+    je .eof 
+    cmp al, 0x20
+    je .done
+    cmp al, 0x9
+    je .done
+    cmp al, 0xA
+    je .done
+    movzx r14, al
+    jmp .read_word
+.too_long:
+    xor rax, rax
+    jmp .done
+.eof:
+    mov byte [rbx + r12], 0
+    mov rax, rbx
+    mov rdx, r12
+.done:
+    add rsp, 8
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
     ret
- 
-
 ; Принимает указатель на строку, пытается
 ; прочитать из её начала беззнаковое число.
 ; Возвращает в rax: число, rdx : его длину в символах
