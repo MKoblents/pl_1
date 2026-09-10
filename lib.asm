@@ -84,8 +84,21 @@ string_equals:
 
 ; Читает один символ из stdin и возвращает его. Возвращает 0 если достигнут конец потока
 read_char:
+    sub rsp, 8
     xor rax, rax
-    ret 
+    xor rdi, rdi
+    mov rsi, rsp
+    mov rdx, 1
+    syscall
+    test rax, rax
+    jz .eof
+    movzx rax, byte [rsp]
+    add rsp, 8
+    ret
+    .eof:
+        add rsp, 8
+        xor rax, rax
+        ret 
 
 ; Принимает: адрес начала буфера, размер буфера
 ; Читает в буфер слово из stdin, пропуская пробельные символы в начале, .
