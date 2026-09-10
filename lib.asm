@@ -9,7 +9,14 @@ exit:
 ; Принимает указатель на нуль-терминированную строку, возвращает её длину
 string_length:
     xor rax, rax
-    ret
+    .loop:
+        cmp byte [rdi + rax], 0
+        je .done
+        inc rax
+        jmp .loop
+    .done:
+        ret
+
 
 ; Принимает указатель на нуль-терминированную строку, выводит её в stdout
 print_string:
