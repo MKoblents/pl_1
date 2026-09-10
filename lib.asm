@@ -56,8 +56,60 @@ print_newline:
 ; Совет: выделите место в стеке и храните там результаты деления
 ; Не забудьте перевести цифры в их ASCII коды.
 print_uint:
-    xor rax, rax
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp, 32
+    mov rbx, rdi
+    xor r12, r12
+    test rbx, rbx
+    jz .print_zero
+.loop:
+    test rbx, rbx
+    jz .add_null
+    mov rax, rbx
+    xor rdx, rdx
+    mov r13, 10
+    div r13
+    add dl, '0'
+    mov [rsp + r12], dl
+    mov rbx, rax
+    inc r12
+    jmp .loop
+.add_null:
+    mov byte [rsp + r12], 0
+.reverce:
+    xor r13, r13
+    mov r14, r12
+    dec r14
+    .reverce_loop:
+        cmp r13, r14
+        jge .done
+        mov r15b, [rsp + r13]
+        mov al, [rsp + r14]
+        mov [rsp + r13], al
+        mov [rsp + r14], r15b
+        inc r13
+        dec r14
+        jmp .reverce_loop
+.done:
+    mov rdi, rsp
+    call print_string
+.end:
+    add rsp, 32
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
     ret
+.print_zero:
+    mov byte [rsp], '0'
+    mov r12, 1
+    jmp .add_null
+
 
 ; Выводит знаковое 8-байтовое число в десятичном формате 
 print_int:
@@ -167,7 +219,20 @@ read_word:
 ; rdx = 0 если число прочитать не удалось
 parse_uint:
     xor rax, rax
-    ret
+    xor rdx, rdx
+    .loop:
+        movzx r8d, byte [rdi + rdx]
+        cmp r8b, '0'
+        jb .done
+        cmp r8b, '9'
+        ja .done
+        sub r8b, '0'
+        imul rax, rax, 10
+        add rax, r8 
+        inc rdx
+        jmp .loop
+    .done:  
+        ret
 
 
 
