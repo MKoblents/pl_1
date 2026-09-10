@@ -123,4 +123,18 @@ parse_int:
 ; Возвращает длину строки если она умещается в буфер, иначе 0
 string_copy:
     xor rax, rax
-    ret
+    .loop:
+        cmp rax, rdx
+        jae .too_long
+        mov r8b, [rdi + rax]
+        mov [rsi + rax], r8b
+        test r8b, r8b
+        je .done
+        inc rax
+        jmp .loop
+    .done:
+        mov byte [rsi + rax], 0
+        ret
+    .too_long:
+        xor rax, rax
+        ret
