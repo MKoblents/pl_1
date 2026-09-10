@@ -203,21 +203,27 @@ read_word:
         test rax, rax
         je .eof 
         cmp al, 0x20
-        je .done
+        je .word_done
         cmp al, 0x9
-        je .done
+        je .word_done
         cmp al, 0xA
-        je .done
+        je .word_done
         movzx r14, al
         jmp .read_word
+     .word_done:
+        mov byte [rbx + r12], 0
+        mov rax, rbx
+        mov rdx, r12
+        jmp .cleanup
     .too_long:
         xor rax, rax
-        jmp .done
+        xor rdx, rdx
+        jmp .cleanup
     .eof:
         mov byte [rbx + r12], 0
         mov rax, rbx
         mov rdx, r12
-    .done:
+    .cleanup:
         add rsp, 8
         pop r14
         pop r13
