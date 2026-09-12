@@ -34,7 +34,6 @@ print_string:
 
 ; Принимает код символа и выводит его в stdout
 print_char:
-    push rdi
     sub rsp, 8
     mov [rsp], dil
     mov rax, 1
@@ -43,7 +42,6 @@ print_char:
     mov rdx, 1
     syscall
     add rsp, 8
-    pop rdi
     ret
 
 ; Переводит строку (выводит символ с кодом 0xA)
