@@ -64,12 +64,12 @@ print_uint:
     xor r12, r12
     test rbx, rbx
     jz .print_zero
+    mov r13, 10
     .loop:
         test rbx, rbx
         jz .add_null
         mov rax, rbx
         xor rdx, rdx
-        mov r13, 10
         div r13
         add dl, '0'
         mov [rsp + r12], dl
