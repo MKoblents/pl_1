@@ -181,7 +181,7 @@ read_word:
     .skip_spaces:
         call read_char
         cmp rax, 0
-        je .eof
+        je .too_long
         cmp al, 0x20
         je .skip_spaces
         cmp al, 0x9
