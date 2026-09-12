@@ -261,8 +261,6 @@ parse_int:
     push rbx
     xor rdx, rdx
     push r12
-    xor rbx, rbx
-    xor r12, r12
     movzx r8d, byte [rdi]
     cmp r8b, '-'
     je .negative
